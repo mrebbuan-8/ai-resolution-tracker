@@ -42,7 +42,7 @@ Compares your actual contract spend against:
 - **Pure pay-as-you-go** (no commitment, PAYG rate per resolution)
 - **Full human agent coverage** (no AI at all)
 
-Includes a contract fee breakdown (seat fees + AI platform fee − vendor discount) and a headcount decision helper: *at what point does adding a human agent beat paying overage?*
+Includes a contract fee breakdown (seat fees + AI platform fee − vendor discount) and a **Do we need to add agents?** section that dynamically calculates how many agents are needed to absorb projected overage volume — and whether that's cheaper than paying the overage fee.
 
 ### Monthly bot performance
 Bot success rate trend + monthly volume split (resolved vs. escalated), on a shared time axis.
@@ -61,7 +61,7 @@ Monthly AI resolutions on this dataset have a coefficient of variation of ~4% �
 
 The forecast uses a **3-month rolling average**, which is both more accurate and more honest for stable, stationary data. The volume slider lets you layer in your own business context (campaigns, seasonality) on top of the baseline forecast.
 
-*Next iteration: replacing the manual slider with Facebook Prophet for automatic seasonality detection.*
+*Next iteration: replacing the manual slider with Meta Prophet for automatic seasonality detection.*
 
 ---
 
@@ -126,6 +126,8 @@ Upload your CSV using the file uploader on the page. No file path configuration 
 
 ## Sidebar Settings
 
+**AI contract**
+
 | Setting | Default | Notes |
 |---|---|---|
 | Contract start date | Jan 1 2025 | Resets the 12-month window |
@@ -134,6 +136,14 @@ Upload your CSV using the file uploader on the page. No file path configuration 
 | Vendor discount | 10% | Applied to contract fee only |
 | Within allowance rate | $0.50 | Per-resolution cost inside the bundle |
 | PAYG overage rate | $2.00 | Per-resolution cost above the bundle |
+
+**Human agent assumptions**
+
+| Setting | Default | Notes |
+|---|---|---|
+| Agent monthly salary | $3,000 | Fully-loaded monthly cost of one human agent |
+| Cost per human-handled ticket | $4.00 | Labour cost each time a human closes a ticket |
+| Tickets per agent per day | 20 | Used to calculate how many agents are needed to absorb overage volume |
 
 ---
 
