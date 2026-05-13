@@ -146,7 +146,7 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is None:
     st.info(
-        "👆 Upload your CSV file above to load the dashboard. "
+        "👆 Upload the sample CSV from the README.md file on GitHub above to load the dashboard. "
         "Use the sidebar to set your contract dates and cost rates."
     )
     st.stop()
