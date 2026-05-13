@@ -124,12 +124,27 @@ cost_ai_overage = st.sidebar.number_input(
     ),
 )
 
-# Agent defaults — hidden from UI, used only in background calculations
+st.sidebar.markdown("#### 👤 Human agent assumptions")
+
+agent_monthly_salary = st.sidebar.number_input(
+    "Agent monthly salary ($)",
+    min_value=500.0, value=3_000.0, step=500.0,
+    help="Fully-loaded monthly cost of one human support agent.",
+)
+cost_human = st.sidebar.number_input(
+    "Cost per human-handled ticket ($)",
+    min_value=0.0, value=4.00, step=0.50,
+    help="What it costs each time a human agent handles a ticket (labour cost per ticket).",
+)
+agent_tickets_per_day = st.sidebar.number_input(
+    "Tickets one agent handles per day",
+    min_value=1, max_value=500, value=20, step=1,
+    help="How many tickets a single agent can realistically close in one working day.",
+)
+
+# Fixed assumptions — not exposed to UI
 num_agents             = 10
 cost_per_seat          = 20.0
-cost_human             = 4.00
-agent_monthly_salary   = 3_000.0
-agent_tickets_per_day  = 20
 working_days_per_month = 22
 
 
@@ -603,45 +618,72 @@ st.caption(
     "The chart above shows usage costs only so the three scenarios are comparable."
 )
 
-# ── Add headcount vs overage decision ────────────────────────────────────────
-st.markdown("#### When does adding a human agent make more sense than paying overage?")
+# ── Do we need to add agents? ─────────────────────────────────────────────────
+st.markdown("#### Do we need to add human agents?")
+st.caption(
+    "This section compares the cost of paying AI overage charges vs. hiring an agent "
+    "to absorb the extra volume. Adjust agent assumptions in the sidebar to update."
+)
 
-projected_monthly_overage_cost = max(adjusted_monthly - safe_pace, 0) * cost_ai_overage if safe_pace > 0 else 0
+# Guard against division by zero if user sets tickets/day to 0
+safe_capacity = max(agent_capacity_per_month, 1)
 
-hc1, hc2, hc3 = st.columns(3)
+# Monthly tickets projected to exceed the safe pace
+# Guard: if remaining_months=0 (contract ended), overage tickets = 0
+monthly_overage_tickets = max(adjusted_monthly - safe_pace, 0) if remaining_months > 0 else 0
+
+# Guard: adjusted_monthly could be negative from slider, clamp to 0
+monthly_overage_tickets = max(monthly_overage_tickets, 0)
+
+projected_monthly_overage_cost = monthly_overage_tickets * cost_ai_overage
+
+# How many agents needed to absorb the monthly overage volume
+agents_needed_for_overage = int(np.ceil(monthly_overage_tickets / safe_capacity)) if monthly_overage_tickets > 0 else 0
+agent_cost_for_overage    = agents_needed_for_overage * agent_monthly_salary
+
+hc1, hc2, hc3, hc4 = st.columns(4)
 hc1.metric(
-    "1 extra agent costs",
-    f"${one_agent_monthly_cost:,.0f}/month",
-    help="Monthly salary input from the sidebar.",
+    "Monthly overage tickets",
+    f"{int(monthly_overage_tickets):,}",
+    help="Tickets per month projected to exceed your safe pace and trigger overage charges.",
 )
 hc2.metric(
     "Projected overage cost/month",
-    f"${projected_monthly_overage_cost:,.0f}/month",
-    help="Based on your current volume vs. safe monthly pace.",
+    f"${projected_monthly_overage_cost:,.0f}",
+    help="What you'd pay in AI overage fees at the current projected volume.",
 )
 hc3.metric(
-    "Agent handles per month",
-    f"{agent_capacity_per_month:,} tickets",
-    help=f"{agent_tickets_per_day} tickets/day × {working_days_per_month} days.",
+    "Agents needed to absorb overage",
+    f"{agents_needed_for_overage}",
+    help=f"Each agent handles {safe_capacity:,} tickets/month ({agent_tickets_per_day}/day × {working_days_per_month} days).",
+)
+hc4.metric(
+    "Cost of those agents/month",
+    f"${agent_cost_for_overage:,.0f}",
+    help=f"{agents_needed_for_overage} agent(s) × ${agent_monthly_salary:,.0f}/month salary.",
 )
 
-if projected_monthly_overage_cost > 0:
-    if one_agent_monthly_cost <= projected_monthly_overage_cost:
-        st.success(
-            f"Adding 1 human agent (${one_agent_monthly_cost:,.0f}/month) is **cheaper** than "
-            f"the projected overage (${projected_monthly_overage_cost:,.0f}/month). "
-            f"That agent can absorb ~{agent_capacity_per_month:,} tickets/month, "
-            f"reducing AI resolution volume and keeping you within the contract limit."
-        )
-    else:
-        st.info(
-            f"Paying the overage (${projected_monthly_overage_cost:,.0f}/month) is still **cheaper** "
-            f"than adding a human agent (${one_agent_monthly_cost:,.0f}/month). "
-            f"If volume keeps growing, revisit this — the crossover point is when "
-            f"overage costs exceed ${one_agent_monthly_cost:,.0f}/month."
-        )
+if monthly_overage_tickets == 0:
+    st.success(
+        "**No agents needed right now.** Volume is within the safe zone — "
+        "no overage projected at the current forecast. Keep monitoring as volume grows."
+    )
+elif agent_cost_for_overage < projected_monthly_overage_cost:
+    st.error(
+        f"**Add {agents_needed_for_overage} agent(s).** "
+        f"Hiring {agents_needed_for_overage} agent(s) (${agent_cost_for_overage:,.0f}/month) is **cheaper** "
+        f"than paying AI overage (${projected_monthly_overage_cost:,.0f}/month). "
+        f"Each agent absorbs ~{safe_capacity:,} tickets/month, bringing volume back within the contract limit."
+    )
 else:
-    st.success("Volume is within the safe zone — no overage or headcount decision needed right now.")
+    crossover = agent_monthly_salary / max(cost_ai_overage, 0.01)
+    st.warning(
+        f"**Paying overage is still cheaper — for now.** "
+        f"Overage cost: **${projected_monthly_overage_cost:,.0f}/month** vs. "
+        f"**${agent_cost_for_overage:,.0f}/month** for {agents_needed_for_overage} agent(s). "
+        f"The crossover point is when monthly overage tickets exceed **{int(crossover):,}** — "
+        f"at that point, hiring becomes the cheaper option."
+    )
 
 st.markdown("---")
 
