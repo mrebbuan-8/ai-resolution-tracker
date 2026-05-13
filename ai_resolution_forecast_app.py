@@ -165,6 +165,19 @@ def load_data(file) -> pd.DataFrame:
 
 df = load_data(uploaded_file)
 
+# ─── Column validation ────────────────────────────────────────────────────────
+required_cols = ["Date and Time Contact", "Source", "Chatbot Resolved", "Handover (Y/N)", "Ticket ID"]
+optional_cols = ["Brand", "Issue"]
+missing_required = [c for c in required_cols if c not in df.columns]
+if missing_required:
+    st.error(
+        f"Your CSV is missing these required columns: **{', '.join(missing_required)}**\n\n"
+        f"Required: Date and Time Contact, Source, Chatbot Resolved, Handover (Y/N), Ticket ID"
+    )
+    st.stop()
+has_brand = "Brand" in df.columns
+has_issue = "Issue" in df.columns
+
 
 # ─── Contract-year filter ─────────────────────────────────────────────────────
 cs  = pd.Timestamp(contract_start)
@@ -270,6 +283,7 @@ one_agent_monthly_cost = agent_monthly_salary
 # ─── Forecast ─────────────────────────────────────────────────────────────────
 last3_avg  = monthly["ai_resolved"].tail(3).mean()
 last3_std  = monthly["ai_resolved"].tail(3).std()
+last3_std  = last3_std if not pd.isna(last3_std) else last3_avg * 0.10  # fallback: 10% of avg if only 1 month
 last3_high = last3_avg + last3_std
 
 remaining_months = max(
@@ -675,12 +689,15 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 #  SECTION 5 — Brand breakdown
 # ─────────────────────────────────────────────────────────────────────────────
-st.subheader("Which brands are using up the contract?")
-st.caption(
-    "Every AI-resolved ticket counts against the annual limit, "
-    "regardless of brand. The funnel shows how tickets flow through "
-    "the chatbot for each brand."
-)
+if not has_brand:
+    st.info("No 'Brand' column found in your CSV — brand breakdown skipped.")
+else:
+    st.subheader("Which brands are using up the contract?")
+    st.caption(
+        "Every AI-resolved ticket counts against the annual limit, "
+        "regardless of brand. The funnel shows how tickets flow through "
+        "the chatbot for each brand."
+    )
 
 brand_res     = (resolved_df.groupby("Brand").size()
                  .rename("Bot resolved").sort_values(ascending=False))
@@ -881,11 +898,14 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 #  SECTION 6 — Issue types
 # ─────────────────────────────────────────────────────────────────────────────
-st.subheader("What kinds of issues does the bot handle well?")
-st.caption(
-    "Where the chatbot is genuinely saving money versus "
-    "where it mostly just escalates to a human anyway."
-)
+if not has_issue:
+    st.info("No 'Issue' column found in your CSV — issue breakdown skipped.")
+else:
+    st.subheader("What kinds of issues does the bot handle well?")
+    st.caption(
+        "Where the chatbot is genuinely saving money versus "
+        "where it mostly just escalates to a human anyway."
+    )
 
 issue_res = resolved_df.groupby("Issue").size().rename("Bot resolved")
 issue_ho  = handover_df.groupby("Issue").size().rename("Passed to human")
