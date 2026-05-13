@@ -2,7 +2,9 @@
 
 A Streamlit dashboard for AI Product Owners and Support Ops teams to track chatbot resolution consumption against a contract allowance, forecast overages, and make cost-informed decisions — without a spreadsheet.
 
-**Stack:** Python · Streamlit · Pandas · Matplotlib · NumPy
+Sample dataset for testing: [download here](https://drive.google.com/file/d/1vHv5UK5E4cIOHSdF26X304OjgV3sToOB/view?usp=drive_link)
+
+**Stack:** Anthropic (Claude) · Python · Streamlit · Pandas · Matplotlib · NumPy
 
 ---
 
@@ -29,26 +31,26 @@ This dashboard answers all of that — from a CSV export.
 
 ## Features
 
-### 📊 At a glance
+### At a glance
 Live snapshot: resolutions used, remaining allowance, % consumed, bot success rate, escalations — with a colour-coded progress bar.
 
-### 🔮 Forecast with volume slider
+### Forecast with volume slider
 Projects year-end totals using a 3-month rolling average. A **±% slider** lets you stress-test seasonal spikes, promos, or slow periods — chart and overage estimates update instantly. Shows both a base forecast and a worst-case band.
 
-### 💰 Cost tracker — 3-way comparison
+### Cost tracker — 3-way comparison
 Compares your actual contract spend against:
 - **Pure pay-as-you-go** (no commitment, PAYG rate per resolution)
 - **Full human agent coverage** (no AI at all)
 
 Includes a contract fee breakdown (seat fees + AI platform fee − vendor discount) and a headcount decision helper: *at what point does adding a human agent beat paying overage?*
 
-### 📈 Monthly bot performance
+### Monthly bot performance
 Bot success rate trend + monthly volume split (resolved vs. escalated), on a shared time axis.
 
-### 🏷️ Brand breakdown
+### Brand breakdown
 Pie chart of allowance consumption by brand, grouped bar chart (resolved vs. escalated per brand), bot success rate per brand (colour-coded), and a ticket flow funnel.
 
-### 🗂️ Issue type breakdown
+### Issue type breakdown
 Which issue types the bot handles well vs. consistently escalates — so you know where to focus automation improvements.
 
 ---
@@ -137,17 +139,11 @@ Upload your CSV using the file uploader on the page. No file path configuration 
 
 ## Background
 
-In a previous support ops role, tracking AI chatbot resolution consumption meant a daily spreadsheet and a lot of gut feel. The CRM (Zendesk) showed current usage — but nothing about whether we'd run out before the contract year ended, or what the right call was when we got close.
+In a previous support ops role, tracking AI chatbot resolution consumption meant a daily spreadsheet and a lot of gut feel. The CRM (Zendesk) showed current usage, but nothing about whether we'd run out before the contract year ended, or what the right call was when we got close.
 
 This dashboard was built to answer those questions automatically from the same data the CRM already collects.
 
 Built as a side project. Tested on synthetic support data. Real-world performance will vary with seasonality and volume patterns — which is exactly what the slider is for.
-
----
-
-## Contributing
-
-PRs welcome. Column name mapping is at the top of `load_data()` in `ai_resolution_forecast_app.py`.
 
 ---
 
