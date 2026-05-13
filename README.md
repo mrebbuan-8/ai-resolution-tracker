@@ -147,4 +147,14 @@ Built as a side project. Tested on synthetic support data. Real-world performanc
 
 ---
 
-*Built with Python + Streamlit. No external APIs. No data leaves your machine.*
+## Known Limitations
+
+1. Agent cost is a flat input — does not account for fully burdened cost (benefits, equipment, overhead)
+2. Forecast uses a 3-month rolling average - does not account for seasonality or volume spikes (a slider exists as a manual workaround)
+3. Brand breakdown shows escalation rate but not the reason — high escalation could mean a poorly trained bot or a deliberately high-touch customer segment
+
+Next: Prophet integration for automatic seasonality detection
+
+---
+
+*Built with Claude, Python + Streamlit. No external APIs. No data leaves your machine.*
