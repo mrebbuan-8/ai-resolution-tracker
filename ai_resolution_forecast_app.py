@@ -1,29 +1,3 @@
-"""
-AI Resolution Tracker  —  v4
-Built for: Jason (Support Ops) + Product Owners + Operations Managers
-No statistics jargon. Plain business language throughout.
-
-HOW TO RUN — LOCAL
-------------------
-1. pip install streamlit pandas matplotlib numpy
-2. streamlit run ai_resolution_forecast_app.py
-3. Upload your CSV using the file uploader on the page.
-
-HOW TO DEPLOY (free, no coding needed)
----------------------------------------
-1. Push this file to a GitHub repository.
-2. Go to https://share.streamlit.io and sign in with GitHub.
-3. Click "New app", pick your repo and this file.
-4. Click Deploy — done. You get a shareable URL.
-
-COST MODEL
-----------
-  1. Bot resolved + within the 50k limit  →  $0.50 / ticket  (contract rate)
-  2. Bot resolved + already over the limit →  $2.00 / ticket  (overage penalty)
-  3. Bot passed ticket to a human agent    →  $4.00 / ticket
-Counterfactual: every ticket handled by a human from the start → $4.00 each.
-"""
-
 from datetime import date
 
 import numpy as np
